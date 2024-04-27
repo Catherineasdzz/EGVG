@@ -24,7 +24,7 @@ pip install -r requirements.txt --index-url https://download.pytorch.org/whl/cu1
 export HF_ENDPOINT=https://hf-mirror.com
 export HF_HUB_ENABLE_HF_TRANSFER=1
 # LLM和Embedding模型
-huggingface-cli download --resume-download meta-llama/Llama-2-7b-chat-hf --local-dir model/llama-2-7b-chat-hf --local-dir-use-symlinks False --token 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
+huggingface-cli download --resume-download meta-llama/Llama-2-7b-chat-hf --local-dir model/llama-2-7b-chat-hf --local-dir-use-symlinks False --token <your_hf_token>
 huggingface-cli download --resume-download BAAI/bge-large-en --local-dir model/bge-large-en --local-dir-use-symlinks False
 # 视频生成模型
 huggingface-cli download --resume-download stabilityai/stable-video-diffusion-img2vid-xt --local-dir model/stable-video-diffusion-img2vid-xt --local-dir-use-symlinks False
