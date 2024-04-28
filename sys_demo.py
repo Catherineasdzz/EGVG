@@ -1,6 +1,7 @@
 # @File    : sys_demo.py
 # @Description : 情感引导视频生成系统的界面实现
 
+import os
 import torch
 import pandas as pd
 import altair as alt
@@ -53,6 +54,10 @@ def get_model():
 # 情感分析
 @st.cache_data
 def ana_emotion(raw_prompt):
+    # 切换工作目录
+    cur_dir = os.path.dirname(os.path.abspath(__file__))
+    frame_dir = os.path.join(cur_dir, 'frame')
+    os.chdir(frame_dir)
     ldf = read_lexicon()  # 读取VAD词典
     sp = analyze_emotion(ldf, raw_prompt)  # 情感分析
     df = pd.DataFrame(sp, columns=['Emotion', 'Percentage'])
@@ -69,6 +74,10 @@ def ana_emotion(raw_prompt):
 # 情感极性过滤
 @st.cache_data
 def fil_prompt(prompt, emotion):
+    # 切换工作目录
+    cur_dir = os.path.dirname(os.path.abspath(__file__))
+    frame_dir = os.path.join(cur_dir, 'frame')
+    os.chdir(frame_dir)
     ldf = read_lexicon()  # 读取VAD词典
     filtered_prompt = filter_prompt(ldf, prompt, emotion)  # 情感极性过滤
     return filtered_prompt
@@ -77,6 +86,10 @@ def fil_prompt(prompt, emotion):
 # 情感引导词匹配
 @st.cache_data
 def get_afw(prompt, emotion, radioAfw):
+    # 切换工作目录
+    cur_dir = os.path.dirname(os.path.abspath(__file__))
+    frame_dir = os.path.join(cur_dir, 'frame')
+    os.chdir(frame_dir)
     afw = ""
     if radioAfw == "随机匹配":
         afw = get_afw_random(emotion)
@@ -88,14 +101,23 @@ def get_afw(prompt, emotion, radioAfw):
 # 结构化情感细节扩写
 @st.cache_data
 def exp_details(prompt, emotion):
+    # 切换工作目录
+    cur_dir = os.path.dirname(os.path.abspath(__file__))
+    frame_dir = os.path.join(cur_dir, 'frame')
+    os.chdir(frame_dir)
     details = expand_details(prompt, emotion)  # 细节扩写
-    structured_prompt = structured_text(details)  # 结构化后处理
+    structured_prompt = structured_text(str(details))  # 结构化后处理
+    structured_prompt = ", " + structured_prompt
     return structured_prompt
 
 
 # 生成视频
 @st.cache_data
 def gen_video(prompt, n_steps=40, high_noise_frac=0.8):
+    # 切换工作目录
+    cur_dir = os.getcwd()
+    tgt_dir = os.path.abspath(os.path.join(cur_dir, ".."))
+    os.chdir(tgt_dir)
     # 生成图像
     image = t2i_base(
         prompt=prompt,
@@ -112,12 +134,12 @@ def gen_video(prompt, n_steps=40, high_noise_frac=0.8):
     image = image.resize((1024, 576))  # 调节分辨率
     # 生成视频
     frames = i2v_pipe(image, decode_chunk_size=8).frames[0]
-    video_path = export_to_video(frames, "results/demo_video.mp4", fps=24)  # 保存视频
+    video_path = export_to_video(frames, "results/demo_video.mp4", fps=8)  # 保存视频
     # 转换生成视频格式为H.264，以显示在网页中
     output_path = "results/demo_video_H264.mp4"
     clip = VideoFileClip(video_path)
     clip.write_videofile(output_path, codec="libx264", audio_codec="aac",
-                         preset="slow", bitrate="1000k", fps=24)
+                         preset="slow", bitrate="1000k", fps=30)
     return output_path
 
 
@@ -133,10 +155,12 @@ if "chart" not in st.session_state:  # 情感分布图
     st.session_state.chart = None
 if "radioAfw" not in st.session_state:  # 情感引导词匹配方式
     st.session_state.radioAfw = ""
+if "buttonPrompt" not in st.session_state:  # 细节扩写选项
+    st.session_state.buttonPrompt = False
+if "filtered_prompt" not in st.session_state:  # 过滤prompt
+    st.session_state.filtered_prompt = ""
 if "afw" not in st.session_state:  # 情感引导词
     st.session_state.afw = ""
-if "details" not in st.session_state:  # 情感视觉细节
-    st.session_state.details = ""
 
 # 设置侧边栏
 with st.sidebar:
@@ -187,24 +211,26 @@ with right_col:
         st.session_state.emotion = emotion  # 更新情感类别状态变量
         filtered_prompt = fil_prompt(raw_prompt, emotion)  # 情感极性过滤
         st.session_state.prompt = filtered_prompt  # 更新prompt状态变量
+        st.session_state.filtered_prompt = filtered_prompt  # 更新过滤prompt状态变量
     afw = get_afw(st.session_state.prompt, emotion, st.session_state.radioAfw)  # 情感引导词匹配
     st.session_state.afw = afw  # 更新情感引导词状态变量
     afw_prompt = st.session_state.prompt + st.session_state.afw  # 获取氛围引导prompt
-    st.session_state.prompt = afw  # 更新prompt状态变量
+    st.session_state.prompt = afw_prompt  # 更新prompt状态变量
 
 # 细节扩写
 with left_col:
-    # 若点击细化提示按钮，则输出扩写的结构化文本指令
+    # 若点击细化提示按钮，则更新相关状态变量
     if buttonPrompt:
-        temp_prompt = st.session_state.prompt - st.session_state.afw  # 扩写前去除引导词
-        structured_prompt = exp_details(temp_prompt, st.session_state.emotion)  # 细节扩写
-        st.session_state.prompt = structured_prompt + st.session_state.afw  # 更新prompt状态变量
+        st.session_state.buttonPrompt = buttonPrompt
+    if st.session_state.buttonPrompt is False:
         new_prompt = st.text_area("当前提示如下：", st.session_state.prompt, key="new_prompt")  # 实时提示框
         st.session_state.prompt = new_prompt  # 更新prompt状态变量
     else:
+        temp_prompt = st.session_state.filtered_prompt  # 扩写前去除引导词
+        structured_prompt = exp_details(temp_prompt, st.session_state.emotion)  # 细节扩写
+        st.session_state.prompt = temp_prompt + structured_prompt + st.session_state.afw  # 更新prompt状态变量
         new_prompt = st.text_area("当前提示如下：", st.session_state.prompt, key="new_prompt")  # 实时提示框
         st.session_state.prompt = new_prompt  # 更新prompt状态变量
-
 
 # 视频生成
 with right_col:

@@ -24,7 +24,7 @@ pip install -r requirements.txt --index-url https://download.pytorch.org/whl/cu1
 export HF_ENDPOINT=https://hf-mirror.com
 export HF_HUB_ENABLE_HF_TRANSFER=1
 # LLM和Embedding模型
-huggingface-cli download --resume-download meta-llama/Llama-2-7b-chat-hf --local-dir model/llama-2-7b-chat-hf --local-dir-use-symlinks False --token <your_hf_token>
+huggingface-cli download --resume-download meta-llama/Llama-2-7b-chat-hf --local-dir model/llama-2-7b-chat-hf --local-dir-use-symlinks False --token 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
 huggingface-cli download --resume-download BAAI/bge-large-en --local-dir model/bge-large-en --local-dir-use-symlinks False
 # 视频生成模型
 huggingface-cli download --resume-download stabilityai/stable-video-diffusion-img2vid-xt --local-dir model/stable-video-diffusion-img2vid-xt --local-dir-use-symlinks False
@@ -33,7 +33,7 @@ huggingface-cli download --resume-download stabilityai/stable-diffusion-xl-refin
 ```
 ### 2.数据准备
 
-直接下载预处理后的数据 [EGVG_data](https://pan.baidu.com/s/1-k18nxSsqyPtXUT1NYQ7jg?pwd=0lfn) 或下载原始数据集重新进行预处理
+直接下载预处理后的数据 [EGVG_data](https://pan.baidu.com/s/1-k18nxSsqyPtXUT1NYQ7jg?pwd=0lfn) 或下载原始数据集重新进行预处理：
 <table>
 <thead>
   <tr>
@@ -65,7 +65,8 @@ huggingface-cli download --resume-download stabilityai/stable-diffusion-xl-refin
 </tbody>
 </table>
 
-模型与数据准备完毕后，代码的组织结构如下：
+模型与数据准备完毕后，代码的组织架构如下：
+
 ```
 EGVG
 |
@@ -98,7 +99,9 @@ EGVG
 
 ## 快速推理
 
+使用基于Streamlit框架构建的系统界面实现情感引导视频生成的快速推理：
+
 ```shell
+export PYTHONPATH=$PYTHONPATH:/your_path/EGVG
 streamlit run sys_demo.py
 ```
-
