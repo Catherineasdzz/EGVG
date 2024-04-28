@@ -31,8 +31,8 @@ def expand_details(prompt, emotion):
     )
     # 加载LLM模型
     llm = HuggingFaceLLM(
-        context_window=4096,
-        max_new_tokens=2048,
+        context_window=2048,
+        max_new_tokens=1024,
         generate_kwargs={"temperature": 0.6, "do_sample": True},
         query_wrapper_prompt=query_wrapper_prompt,
         tokenizer_name=model_name_or_path,

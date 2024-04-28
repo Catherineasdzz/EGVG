@@ -55,4 +55,4 @@ image = image.resize((1024, 576))
 
 # 生成视频
 frames = i2v_pipe(image, decode_chunk_size=8).frames[0]
-export_to_video(frames, "../results/svd_video.mp4", fps=24)  # 保存视频
+export_to_video(frames, "../results/svd_video.mp4", fps=8)  # 保存视频
