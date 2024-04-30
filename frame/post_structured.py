@@ -32,7 +32,9 @@ def structured_text(text):
                 adjective_noun_pairs.append(f"{doc[k].text} {token.text}")
     drop_list = ["adjective", "noun", "context", "information",
                  "question", "answer", "query", "object",
-                 "prompt", "pair", "sentence", "theme"]
+                 "prompt", "pair", "sentence", "theme",
+                 "understand", "knowledge", "aspect", "detail",
+                 "response", "insight", "address"]
     filtered_list = [item for item in adjective_noun_pairs if not any(drop_item in item for drop_item in drop_list)]
     unique_list = list(set(filtered_list))  # 去除重复的细节
     output = ", ".join(unique_list)  # 将结果输出为逗号分隔的形式
